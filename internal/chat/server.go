@@ -61,6 +61,23 @@ func (s *Server) SendMessage(ctx context.Context, req *pb.SendMessageRequest) (*
 	}, nil
 }
 
+func (s *Server) ListUsers(ctx context.Context, req *pb.ListUsersRequest) (*pb.ListUsersResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	usernames := make([]string, 0, len(s.users))
+
+	for _, user := range s.users {
+		usernames = append(usernames, user.Name)
+	}
+
+	log.Printf("ListUsers called, returning %d users", len(usernames))
+
+	return &pb.ListUsersResponse{
+		Usernames: usernames,
+	}, nil
+}
+
 func (s *Server) ChatStream(stream pb.ChatService_ChatStreamServer) error {
 	var userId string
 

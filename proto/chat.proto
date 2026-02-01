@@ -50,6 +50,14 @@ message ChatMessage {
   }
 }
 
+// ListUsersRequest for requesting connected users
+message ListUsersRequest {}
+
+// ListUsersResponse returns list of connected users
+message ListUsersResponse {
+    repeated string usernames = 1;
+}
+
 // ChatService definition
 service ChatService {
   // Join the chat
@@ -60,4 +68,7 @@ service ChatService {
   
   // Bidirectional streaming for real-time chat
   rpc ChatStream(stream ChatMessage) returns (stream ChatMessage);
+
+  // List connected users
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
 }

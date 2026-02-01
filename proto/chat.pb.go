@@ -446,6 +446,88 @@ func (*ChatMessage_UserJoined) isChatMessage_Event() {}
 
 func (*ChatMessage_UserLeft) isChatMessage_Event() {}
 
+// ListUsersRequest for requesting connected users
+type ListUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersRequest) Reset() {
+	*x = ListUsersRequest{}
+	mi := &file_proto_chat_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersRequest) ProtoMessage() {}
+
+func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_chat_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
+func (*ListUsersRequest) Descriptor() ([]byte, []int) {
+	return file_proto_chat_proto_rawDescGZIP(), []int{7}
+}
+
+// ListUsersResponse returns list of connected users
+type ListUsersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Usernames     []string               `protobuf:"bytes,1,rep,name=usernames,proto3" json:"usernames,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListUsersResponse) Reset() {
+	*x = ListUsersResponse{}
+	mi := &file_proto_chat_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListUsersResponse) ProtoMessage() {}
+
+func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_chat_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
+func (*ListUsersResponse) Descriptor() ([]byte, []int) {
+	return file_proto_chat_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListUsersResponse) GetUsernames() []string {
+	if x != nil {
+		return x.Usernames
+	}
+	return nil
+}
+
 var File_proto_chat_proto protoreflect.FileDescriptor
 
 const file_proto_chat_proto_rawDesc = "" +
@@ -480,12 +562,16 @@ const file_proto_chat_proto_rawDesc = "" +
 	"userJoined\x12)\n" +
 	"\tuser_left\x18\x03 \x01(\v2\n" +
 	".chat.UserH\x00R\buserLeftB\a\n" +
-	"\x05event2\xb8\x01\n" +
+	"\x05event\"\x12\n" +
+	"\x10ListUsersRequest\"1\n" +
+	"\x11ListUsersResponse\x12\x1c\n" +
+	"\tusernames\x18\x01 \x03(\tR\tusernames2\xf6\x01\n" +
 	"\vChatService\x12-\n" +
 	"\x04Join\x12\x11.chat.JoinRequest\x1a\x12.chat.JoinResponse\x12B\n" +
 	"\vSendMessage\x12\x18.chat.SendMessageRequest\x1a\x19.chat.SendMessageResponse\x126\n" +
 	"\n" +
-	"ChatStream\x12\x11.chat.ChatMessage\x1a\x11.chat.ChatMessage(\x010\x01B-Z+github.com/Andonys24/chat-server-grpc/protob\x06proto3"
+	"ChatStream\x12\x11.chat.ChatMessage\x1a\x11.chat.ChatMessage(\x010\x01\x12<\n" +
+	"\tListUsers\x12\x16.chat.ListUsersRequest\x1a\x17.chat.ListUsersResponseB-Z+github.com/Andonys24/chat-server-grpc/protob\x06proto3"
 
 var (
 	file_proto_chat_proto_rawDescOnce sync.Once
@@ -499,7 +585,7 @@ func file_proto_chat_proto_rawDescGZIP() []byte {
 	return file_proto_chat_proto_rawDescData
 }
 
-var file_proto_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_proto_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_proto_chat_proto_goTypes = []any{
 	(*User)(nil),                // 0: chat.User
 	(*Message)(nil),             // 1: chat.Message
@@ -508,6 +594,8 @@ var file_proto_chat_proto_goTypes = []any{
 	(*SendMessageRequest)(nil),  // 4: chat.SendMessageRequest
 	(*SendMessageResponse)(nil), // 5: chat.SendMessageResponse
 	(*ChatMessage)(nil),         // 6: chat.ChatMessage
+	(*ListUsersRequest)(nil),    // 7: chat.ListUsersRequest
+	(*ListUsersResponse)(nil),   // 8: chat.ListUsersResponse
 }
 var file_proto_chat_proto_depIdxs = []int32{
 	0, // 0: chat.Message.sender:type_name -> chat.User
@@ -518,11 +606,13 @@ var file_proto_chat_proto_depIdxs = []int32{
 	2, // 5: chat.ChatService.Join:input_type -> chat.JoinRequest
 	4, // 6: chat.ChatService.SendMessage:input_type -> chat.SendMessageRequest
 	6, // 7: chat.ChatService.ChatStream:input_type -> chat.ChatMessage
-	3, // 8: chat.ChatService.Join:output_type -> chat.JoinResponse
-	5, // 9: chat.ChatService.SendMessage:output_type -> chat.SendMessageResponse
-	6, // 10: chat.ChatService.ChatStream:output_type -> chat.ChatMessage
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
+	7, // 8: chat.ChatService.ListUsers:input_type -> chat.ListUsersRequest
+	3, // 9: chat.ChatService.Join:output_type -> chat.JoinResponse
+	5, // 10: chat.ChatService.SendMessage:output_type -> chat.SendMessageResponse
+	6, // 11: chat.ChatService.ChatStream:output_type -> chat.ChatMessage
+	8, // 12: chat.ChatService.ListUsers:output_type -> chat.ListUsersResponse
+	9, // [9:13] is the sub-list for method output_type
+	5, // [5:9] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
 	5, // [5:5] is the sub-list for extension extendee
 	0, // [0:5] is the sub-list for field type_name
@@ -544,7 +634,7 @@ func file_proto_chat_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_chat_proto_rawDesc), len(file_proto_chat_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

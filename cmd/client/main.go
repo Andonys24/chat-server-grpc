@@ -95,7 +95,7 @@ func main() {
 			continue
 		}
 
-		_, shouldExit := handleInput(text, user, msgChan, done)
+		_, shouldExit := handleInput(text, user, client, msgChan, done)
 		if shouldExit {
 			break
 		}
@@ -164,7 +164,7 @@ func sendMessages(stream pb.ChatService_ChatStreamClient, user *pb.User, msgChan
 	}
 }
 
-func handleInput(text string, user *pb.User, msgChan chan<- string, done chan<- struct{}) (handled bool, shouldExit bool) {
+func handleInput(text string, user *pb.User, client pb.ChatServiceClient, msgChan chan<- string, done chan<- struct{}) (handled bool, shouldExit bool) {
 	if !strings.HasPrefix(text, "/") {
 		// It's not a command, it sends as a normal message
 		msgChan <- text
@@ -191,7 +191,7 @@ func handleInput(text string, user *pb.User, msgChan chan<- string, done chan<- 
 			msgChan <- parts[1]
 		}
 	case "/users":
-		fmt.Println("[INFO] /users command not yet implemented (requires RPC)")
+		listUser(client)
 	default:
 		fmt.Printf("Unknown command: %s. Type /help for available commands.\n", cmd)
 	}
@@ -202,9 +202,31 @@ func handleInput(text string, user *pb.User, msgChan chan<- string, done chan<- 
 func printHelp() {
 	fmt.Println(`=== Available Commands ===
 /all <message>   - Send message to all users
-/users          - List connected users (coming soon)
+/users          - List connected users
 /clear          - Clear screen
 /help           - Show this help message
 /exit           - Disconnect and exit
 ========================`)
+}
+
+func listUser(client pb.ChatServiceClient) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	resp, err := client.ListUsers(ctx, &pb.ListUsersRequest{})
+
+	if err != nil {
+		fmt.Printf("Error listing users: %v\n", err)
+		return
+	}
+
+	fmt.Print("\n=== Connected Users ===\n")
+	if len(resp.Usernames) == 0 {
+		fmt.Println("(No users connected)")
+	} else {
+		for i, username := range resp.Usernames {
+			fmt.Printf("%d. %s\n", i+1, username)
+		}
+	}
+	fmt.Print("=======================\n\n")
 }
