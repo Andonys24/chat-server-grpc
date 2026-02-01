@@ -27,7 +27,7 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	// Register ChatService
-	chatServer := chat.NewServer()
+	chatServer := chat.NewServer(cfg.MaxConnections)
 	pb.RegisterChatServiceServer(grpcServer, chatServer)
 
 	log.Printf("gRPC Chat Server listening on %s", address)

@@ -110,6 +110,7 @@ func receiveMessages(stream pb.ChatService_ChatStreamClient, done <-chan struct{
 
 			if err != nil {
 				log.Printf("Stream closed: %v", err)
+				os.Exit(1)
 				return
 			}
 

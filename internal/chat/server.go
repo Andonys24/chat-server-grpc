@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -11,16 +12,18 @@ import (
 
 type Server struct {
 	pb.UnimplementedChatServiceServer
-	mu       sync.Mutex
-	users    map[string]*pb.User
-	messages []*pb.Message
-	clients  map[string]pb.ChatService_ChatStreamServer
+	mu             sync.Mutex
+	maxConnections int
+	users          map[string]*pb.User
+	messages       []*pb.Message
+	clients        map[string]pb.ChatService_ChatStreamServer
 }
 
-func NewServer() *Server {
+func NewServer(maxConnections int) *Server {
 	return &Server{
-		users:   make(map[string]*pb.User),
-		clients: make(map[string]pb.ChatService_ChatStreamServer),
+		maxConnections: maxConnections,
+		users:          make(map[string]*pb.User),
+		clients:        make(map[string]pb.ChatService_ChatStreamServer),
 	}
 }
 
@@ -74,9 +77,17 @@ func (s *Server) ChatStream(stream pb.ChatService_ChatStreamServer) error {
 			userId = user.GetId()
 
 			s.mu.Lock()
+			if len(s.clients) >= s.maxConnections {
+				s.mu.Unlock()
+				log.Printf("Max connections reached, rejecting user %s", user.Name)
+				return fmt.Errorf("Server full")
+			}
+
 			s.users[user.Id] = user
 			s.clients[user.Id] = stream
 			s.mu.Unlock()
+
+			log.Printf("User %s joined (ID: %s, total: %d)", user.Name, user.Id, len(s.clients))
 
 			s.broadcast(&pb.ChatMessage{
 				Event: &pb.ChatMessage_UserJoined{UserJoined: user},
@@ -87,13 +98,18 @@ func (s *Server) ChatStream(stream pb.ChatService_ChatStreamServer) error {
 			s.mu.Lock()
 			delete(s.users, user.GetId())
 			delete(s.clients, user.GetId())
+			totalClients := len(s.clients)
 			s.mu.Unlock()
+
+			log.Printf("User %s left (ID: %s, total: %d)", user.Name, user.Id, totalClients)
 
 			s.broadcast(&pb.ChatMessage{
 				Event: &pb.ChatMessage_UserLeft{UserLeft: user},
 			})
 		case *pb.ChatMessage_Message:
 			msg := ev.Message
+
+			log.Printf("Message from %s: %s", msg.Sender.Name, msg.Content)
 
 			s.mu.Lock()
 			s.messages = append(s.messages, msg)
@@ -107,8 +123,15 @@ func (s *Server) ChatStream(stream pb.ChatService_ChatStreamServer) error {
 
 	if userId != "" {
 		s.mu.Lock()
-		delete(s.clients, userId)
-		s.mu.Unlock()
+		_, exists := s.clients[userId]
+		if exists {
+			delete(s.clients, userId)
+			totalClients := len(s.clients)
+			s.mu.Unlock()
+			log.Printf("User ID %s disconnected unexpectedly (total: %d)", userId, totalClients)
+		} else {
+			s.mu.Unlock()
+		}
 	}
 
 	return nil
