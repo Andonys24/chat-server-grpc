@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "github.com/Andonys24/chat-server-grpc/proto";
+
+// User represents a chat user
+message User {
+    string id = 1;
+    string name = 2;
+}
+
+// Message represents a chat message
+message Message {
+    string id = 1;
+    User sender = 2;
+    string content = 3;
+    int64 timestamp = 4;
+}
+
+// JoinRequest is sent when a user wants to join the chat
+message JoinRequest {
+    string username = 1;
+}
+
+// JoinResponse is sent back with user info
+message JoinResponse {
+    User user = 1;
+    string message = 2;
+}
+
+// SendMessageRequest for sending a message
+message SendMessageRequest {
+    string user_id = 1;
+    string content = 2;
+}
+
+// SendMessageResponse confirms message sent
+message SendMessageResponse {
+    bool success = 1;
+    string message_id = 2;
+}
+
+// ChatMessage for streaming
+message ChatMessage {
+  oneof event {
+    Message message = 1;
+    User user_joined = 2;
+    User user_left = 3;
+  }
+}
+
+// ChatService definition
+service ChatService {
+  // Join the chat
+  rpc Join(JoinRequest) returns (JoinResponse);
+  
+  // Send a message
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  
+  // Bidirectional streaming for real-time chat
+  rpc ChatStream(stream ChatMessage) returns (stream ChatMessage);
+}

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"chat-server-grpc/internal/chat"
-	"chat-server-grpc/internal/config"
 	"fmt"
+
+	"github.com/Andonys24/chat-server-grpc/internal/chat"
+	"github.com/Andonys24/chat-server-grpc/internal/config"
 )
 
 func main() {
