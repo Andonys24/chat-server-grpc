@@ -95,7 +95,7 @@ func main() {
 			continue
 		}
 
-		_, shouldExit := handleInput(text, user, client, msgChan, done)
+		_, shouldExit := handleInput(text, client, msgChan, done)
 		if shouldExit {
 			break
 		}
@@ -119,7 +119,8 @@ func receiveMessages(stream pb.ChatService_ChatStreamClient, done <-chan struct{
 			switch ev := msg.GetEvent().(type) {
 			case *pb.ChatMessage_Message:
 				m := ev.Message
-				fmt.Printf("[%s]: %s\n", m.GetSender().GetName(), m.GetContent())
+				t := time.Unix(m.GetTimestamp(), 0)
+				fmt.Printf("[%s] [%s]: %s\n", t.Format("15:04"), m.GetSender().GetName(), m.GetContent())
 			case *pb.ChatMessage_UserJoined:
 				u := ev.UserJoined
 				fmt.Printf(">>> %s joined\n", u.GetName())
@@ -164,7 +165,7 @@ func sendMessages(stream pb.ChatService_ChatStreamClient, user *pb.User, msgChan
 	}
 }
 
-func handleInput(text string, user *pb.User, client pb.ChatServiceClient, msgChan chan<- string, done chan<- struct{}) (handled bool, shouldExit bool) {
+func handleInput(text string, client pb.ChatServiceClient, msgChan chan<- string, done chan<- struct{}) (handled bool, shouldExit bool) {
 	if !strings.HasPrefix(text, "/") {
 		// It's not a command, it sends as a normal message
 		msgChan <- text
