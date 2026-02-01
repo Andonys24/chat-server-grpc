@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+	chat.GenerateTitle("Chat server with Go and gRPC", true)
 	// Load Configuration
 	cfg := config.LoadConfig()
 
@@ -90,13 +91,14 @@ func main() {
 	for scanner.Scan() {
 		text := scanner.Text()
 
-		if strings.ToLower(text) == "exit" {
-			close(msgChan)
-			close(done)
-			break
+		if text == "" {
+			continue
 		}
 
-		msgChan <- text
+		_, shouldExit := handleInput(text, user, msgChan, done)
+		if shouldExit {
+			break
+		}
 	}
 }
 
@@ -160,4 +162,49 @@ func sendMessages(stream pb.ChatService_ChatStreamClient, user *pb.User, msgChan
 			return
 		}
 	}
+}
+
+func handleInput(text string, user *pb.User, msgChan chan<- string, done chan<- struct{}) (handled bool, shouldExit bool) {
+	if !strings.HasPrefix(text, "/") {
+		// It's not a command, it sends as a normal message
+		msgChan <- text
+		return false, false
+	}
+
+	parts := strings.SplitN(text, " ", 2)
+	cmd := strings.ToLower(parts[0])
+	shouldExit = false
+
+	switch cmd {
+	case "/clear":
+		chat.CleanConsole()
+	case "/help":
+		printHelp()
+	case "/exit":
+		close(msgChan)
+		close(done)
+		shouldExit = true
+	case "/all":
+		if len(parts) < 2 {
+			fmt.Println("Usage: /all <message>")
+		} else {
+			msgChan <- parts[1]
+		}
+	case "/users":
+		fmt.Println("[INFO] /users command not yet implemented (requires RPC)")
+	default:
+		fmt.Printf("Unknown command: %s. Type /help for available commands.\n", cmd)
+	}
+
+	return true, shouldExit
+}
+
+func printHelp() {
+	fmt.Println(`=== Available Commands ===
+/all <message>   - Send message to all users
+/users          - List connected users (coming soon)
+/clear          - Clear screen
+/help           - Show this help message
+/exit           - Disconnect and exit
+========================`)
 }
